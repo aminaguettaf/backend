@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 // importation de la classe Factory pour interagir avec firebase
 use Kreait\Firebase\Factory;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller{
 
@@ -14,76 +15,84 @@ class ProductController extends Controller{
     protected  $firestore;
     // constructeur 
     public function __construct(){
-    // initialise factory avec les clé qui se trouve dans firebase_credentials.json
+        // initialise factory avec les clé qui se trouve dans firebase_credentials.json
         $factory = (new Factory)
         ->withServiceAccount(__DIR__.'/firebase_credentials.json');
-    // créer une instance de firestore et stocke la connexion dans $this->firestore
-        $this->firestore = $factory->createFirestore()->database();
+        // créer une instance de firestore et stocke la connexion dans $this->firestore
+        $this->firestore = $factory->createFirestore()->database(); 
     }
 
     // *****************************************
     // Ajouter un produit
-    // prend un objet en parametre, qui contient les dnnées envoyées par un client (via un formulaire)
     public function store(Request $request) {
-        // vérifier si les données envoyées respectent les regles
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'size' => 'nullable|array',
-            'color' => 'nullable|array',
-            'available' => 'required|boolean',
-            'image' => 'nullable|string',
-            'category' => 'required|string|max:255',
-        ]);
+        try {
+            // vérifier si les données envoyées respectent les regles
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'description' => 'nullable|string',
+                'size' => 'nullable|array',
+                'color' => 'nullable|array',
+                'available' => 'required|boolean',
+                'image' => 'nullable|string',
+                'category' => 'required|string|max:255',
+            ],[
+                'name.required' => 'The name field is required.',
+                'price.required' => 'The price field is required.',
+                'price.numeric' => 'The price must be a number.',
+                'price.min' => 'The price must be at least 0.',
+                'available.required' => 'The available field is required.',
+                'category.required' => 'The category field is required.',
+            ]);
     
-        // ajoute un nouveau document à la collection products avec les données reçues.
-        $newProduct = $this->firestore->collection('products')->add([
-            'name' => $request->name,
-            'price' => $request->price,
-            'description' => $request->description,
-            'size' => $request->size,
-            'color' => $request->color,
-            'available' => $request->available,
-            'image' => $request->image,
-            'category' => $request->category,
-            'created_at' => now()->toDateTimeString(),
-        ]);
-        // Retourne une réponse JSON avec un message de succès et l’ID du produit ajouté
-        return response()->json([
-            'success' => true,
-            'message' => 'Product added successfully',
-            'id' => $newProduct->id(),
-        ]);
+            // ajoute un nouveau document à la collection products avec les données reçues.
+            $newProduct = $this->firestore->collection('products')->add([
+                'name' => $request->name,
+                'price' => $request->price,
+                'description' => $request->description,
+                'size' => $request->size,
+                'color' => $request->color,
+                'available' => $request->available,
+                'image' => $request->image,
+                'category' => $request->category,
+                'created_at' => now()->toDateTimeString(),
+            ]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Product added successfully',
+                'id' => $newProduct->id(),
+            ]);
+        }
+         catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     // *****************************************
     // Récuperer et afficher tous les produits 
     public function index(){
         try {
-            // recuperer tous les documents de la collection products
             $productsQuery = $this->firestore->collection('products')->documents();
-            // creer un tableau products pour les stocker
             $products = [];
-            // parcours chaque document et l ajoute au tableau products s'il existe
             foreach ($productsQuery as $product) {
                 if ($product->exists()) {
                     $products[] = array_merge(['id' => $product->id()], $product->data());
                 }
             }
-            // si aucun le tableau products est vide retourne une reponse json 
             if (empty($products)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'No products found',
                 ], 404);
             }
-            // sinon retourné les produits trouvés
             return response()->json([
                 'success' => true,
                 'products' => $products,
             ], 200);
-        // en cas d'erreur retourne un msg d'erreur 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -93,59 +102,61 @@ class ProductController extends Controller{
     }
  
     // *****************************************
-    // mettre a jour un produit
+    // Mettre à jour un produit
     public function update(Request $request, $id) {
-        // valider les données
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'size' => 'nullable|array',
-            'color' => 'nullable|array',
-            'available' => 'required|boolean',
-            'image' => 'nullable|string',
-            'category' => 'required|string|max:255',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'price' => 'required|numeric|min:0',
+                'description' => 'nullable|string',
+                'size' => 'nullable|array',
+                'color' => 'nullable|array',
+                'available' => 'required|boolean',
+                'image' => 'nullable|string',
+                'category' => 'required|string|max:255',
+            ]);
     
-        // récuperer le produit par son id
-        $productRef = $this->firestore->collection('products')->document($id);
-        // snapshot pour recuperer un copie du document en lecture pour vérifier si le produit existe 
-        $productSnapshot = $productRef->snapshot();
-        if (!$productSnapshot->exists()) {
+            $productRef = $this->firestore->collection('products')->document($id);
+            $productSnapshot = $productRef->snapshot();
+            if (!$productSnapshot->exists()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Product not found'
+                ], 404);
+            }
+    
+            $productRef->set([
+                'name' => $request->name,
+                'price' => $request->price,
+                'description' => $request->description,
+                'size' => $request->size,
+                'color' => $request->color,
+                'available' => $request->available,
+                'image' => $request->image,
+                'category' => $request->category,
+                'updated_at' => now()->toDateTimeString(),
+            ], ['merge' => true]);
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Product updated successfully',
+                'id' => $id
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Product not found'
-            ], 404);
+                'error' => $e->getMessage(),
+            ], 500);
         }
-    
-        // Met a jour le produit avec les nouvelles valeurs envoyés
-        $productRef->set([
-            'name' => $request->name,
-            'price' => $request->price,
-            'description' => $request->description,
-            'size' => $request->size,
-            'color' => $request->color,
-            'available' => $request->available,
-            'image' => $request->image,
-            'category' => $request->category,
-            'updated_at' => now()->toDateTimeString(),
-        ], ['merge' => true]); // `merge` permet de ne pas écraser les autres champs
-    
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'id' => $id
-        ]);
     }
 
-    // supprimer un produit 
+    // *****************************************
+    // Supprimer un produit
     public function delete($id){
         try {
-           // Récupérer le produit par son id
-           $productRef = $this->firestore->collection('products')->document($id);
-           $productSnapshot = $productRef->snapshot();
+            $productRef = $this->firestore->collection('products')->document($id);
+            $productSnapshot = $productRef->snapshot();
 
-            // Vérifier si le produit existe
             if (!$productSnapshot->exists()) {
                 return response()->json([
                     'success' => false,
@@ -153,7 +164,6 @@ class ProductController extends Controller{
                 ], 404);
             }
 
-           // Supprimer le document
             $productRef->delete();
             return response()->json([
                 'success' => true,
@@ -166,5 +176,4 @@ class ProductController extends Controller{
             ], 500);
         }
     }
-
 }
