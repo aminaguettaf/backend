@@ -9,11 +9,17 @@ class ImageController extends Controller
     protected $firestore;
     // Constructeur pour initialiser Firestore
     public function __construct(){
-        // $firebaseCredentials = json_decode(env('FIREBASE_CREDENTIALS'), true);
-        // $factory = (new Factory)->withServiceAccount($firebaseCredentials);
-        $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
+        // $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
 
+        // $this->firestore = $factory->createFirestore()->database();
+       
+        $credentials = config('app.firebase'); // Récupérer la config Firebase
+        
+        $factory = (new Factory)
+            ->withServiceAccount($credentials);
+        
         $this->firestore = $factory->createFirestore()->database();
+        
     }
 
     // methode pour sauvegarder une image

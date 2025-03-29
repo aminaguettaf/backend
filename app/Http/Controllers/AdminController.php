@@ -10,11 +10,13 @@ use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller{
     protected  $firestore;
-    public function __construct(){
-        // $firebaseCredentials = json_decode(env('FIREBASE_CREDENTIALS'), true);
-        // $factory = (new Factory)->withServiceAccount($firebaseCredentials);
-        $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
-
+    // constructeur 
+    public function __construct() {
+        $credentials = config('app.firebase'); // Récupérer la config Firebase
+    
+        $factory = (new Factory)
+            ->withServiceAccount($credentials);
+    
         $this->firestore = $factory->createFirestore()->database();
     }
 

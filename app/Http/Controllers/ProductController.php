@@ -14,12 +14,12 @@ class ProductController extends Controller{
     // stocker la connexion à firestore
     protected  $firestore;
     // constructeur 
-    public function __construct(){
-        // initialise factory avec les clé qui se trouve dans firebase_credentials.json
-        // $firebaseCredentials = json_decode(env('FIREBASE_CREDENTIALS'), true);
-        // $factory = (new Factory)->withServiceAccount($firebaseCredentials);
-        $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
-
+    public function __construct() {
+        $credentials = config('app.firebase'); // Récupérer la config Firebase
+    
+        $factory = (new Factory)
+            ->withServiceAccount($credentials);
+    
         $this->firestore = $factory->createFirestore()->database();
     }
 

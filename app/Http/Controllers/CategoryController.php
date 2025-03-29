@@ -7,14 +7,19 @@ use Kreait\Firebase\Factory;
 
 class CategoryController extends Controller{
     protected  $firestore;
-    public function __construct(){
-        // $firebaseCredentials = json_decode(env('FIREBASE_CREDENTIALS'), true);
-        // $factory = (new Factory)->withServiceAccount($firebaseCredentials);
-        $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
+    // public function __construct(){
+    //     $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
 
+    //     $this->firestore = $factory->createFirestore()->database();
+    // }
+    public function __construct() {
+        $credentials = config('app.firebase'); // Récupérer la config Firebase
+    
+        $factory = (new Factory)
+            ->withServiceAccount($credentials);
+    
         $this->firestore = $factory->createFirestore()->database();
     }
-
     // Ajouter une categorie
     public function addCategory(Request $request){
         try {
