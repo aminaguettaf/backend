@@ -147,5 +147,11 @@ return [
         ],
 
     ],
+    'firestore' => [
+    'driver' => 'firestore',
+    'key_file' => env('FIREBASE_CREDENTIALS'), // Chemin vers tes clés Firestore
+    'database' => env('FIREBASE_PROJECT_ID'),  // ID de ton projet Firebase
+    'client' => env('FIRESTORE_CLIENT', 'rest'), // Utiliser REST au lieu de gRPC
+],
 
 ];
