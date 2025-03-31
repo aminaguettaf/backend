@@ -19,8 +19,7 @@ class AdminController extends Controller{
     
         $this->firestore = $factory->createFirestore()->database();
     }
-
-   
+     
     public function login(Request $request){
     try {
         $email = $request->email;

@@ -3,24 +3,23 @@
 namespace App\Http\Controllers;
 use Kreait\Firebase\Factory;
 use Illuminate\Http\Request;
+use Google\Cloud\Firestore\FirestoreClient;
 
 class ImageController extends Controller
 {
     protected $firestore;
     // Constructeur pour initialiser Firestore
-    public function __construct(){
-        // $factory = (new Factory) ->withServiceAccount(__DIR__.'/firebase_credentials.json');
-
-        // $this->firestore = $factory->createFirestore()->database();
-       
+    public function __construct() {
         $credentials = config('app.firebase'); // Récupérer la config Firebase
-        
+    
         $factory = (new Factory)
             ->withServiceAccount($credentials);
-        
+    
         $this->firestore = $factory->createFirestore()->database();
-        
     }
+    
+    
+    
 
     // methode pour sauvegarder une image
     public function uploadImage(Request $request) {

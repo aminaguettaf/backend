@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 // importation de la classe Factory pour interagir avec firebase
 use Kreait\Firebase\Factory;
 use Illuminate\Validation\ValidationException;
+use Google\Cloud\Firestore\FirestoreClient;
 
 class ProductController extends Controller{
 

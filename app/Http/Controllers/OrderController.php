@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Kreait\Firebase\Factory;
+use Google\Cloud\Firestore\FirestoreClient;
 
 class OrderController extends Controller{
     protected  $firestore;
