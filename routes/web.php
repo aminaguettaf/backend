@@ -18,14 +18,14 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-use Illuminate\Support\Facades\Request;
+// use Illuminate\Support\Facades\Request;
 
-Route::get('/server-info', function () {
-    $serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? 'UNKNOWN';
-    $phpSapiName = php_sapi_name();
+// Route::get('/server-info', function () {
+//     $serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? 'UNKNOWN';
+//     $phpSapiName = php_sapi_name();
     
-    return [
-        'server_software' => $serverSoftware, // Apache/Nginx/etc.
-        'php_sapi' => $phpSapiName,          // fpm-fcgi, apache2handler, etc.
-    ];
-});
+//     return [
+//         'server_software' => $serverSoftware, // Apache/Nginx/etc.
+//         'php_sapi' => $phpSapiName,          // fpm-fcgi, apache2handler, etc.
+//     ];
+// });
