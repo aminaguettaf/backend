@@ -80,7 +80,7 @@ return [
                  */
                 'project_id' => env('FIREBASE_PROJECT_ID', 'adminapanel'),
                 'database' => env('FIREBASE_FIRESTORE_DATABASE', '(default)'),
-                 'transport' => 'grpc'
+                'transport' => 'rest', 
 
                 // 'database' => env('FIREBASE_FIRESTORE_DATABASE'),
             ],
