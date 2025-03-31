@@ -38,7 +38,7 @@ class ImageController extends Controller
             $path = $image->storeAs('images', $imageName, 'public'); 
 
             // retourne l'URL de l'image stockée
-            return response()->json(['image_url' => asset('storage/'.$path)]);
+            return response()->json(['image_url' => url('storage/'.$path)]);
         }
     
         return response()->json(['error' => 'No image uploaded'], 400);

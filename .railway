@@ -1,5 +1,1 @@
-PHP_EXTENSIONS=openssl,grpc,gd,fileinfo
-NIXPACKS_PKGS=libpng-dev libjpeg-dev
-RAILWAY_RUN_COMMAND="php artisan migrate --force && php artisan storage:link && php-fpm"
-NIXPACKS_PKGS=libpng-dev libjpeg-dev
-RAILWAY_RUN_COMMAND="chmod +x setup.sh && ./setup.sh"
+PHP_EXTENSIONS=openssl,grpc
