@@ -1,17 +1,12 @@
-FROM php:8.2-fpm
-
-# Installer les dépendances système
-RUN apt-get update && apt-get install -y \
-    libzip-dev unzip git curl \
-    && docker-php-ext-install pdo pdo_mysql zip
-
-# Installer Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
+FROM php:8.2-fpm-alpine
 WORKDIR /var/www/html
 
-COPY . .
+RUN apk add --no-cache nginx && \
+    docker-php-ext-install pdo pdo_mysql && \
+    echo "events {} http { server { listen 8000; root /var/www/html/public; location / { try_files \$uri /index.php?\$args; } location ~ \.php\$ { fastcgi_pass 127.0.0.1:9000; include fastcgi_params; fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name; } } }" > /etc/nginx/nginx.conf
 
-RUN composer install --no-dev --optimize-autoloader
+COPY --chown=www-data:www-data . .
+RUN chmod -R 775 storage bootstrap/cache && \
+    composer install --no-dev --optimize-autoloader
 
-RUN chmod -R 775 storage bootstrap/cache
+CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
